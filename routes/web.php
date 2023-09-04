@@ -50,8 +50,6 @@ Route::post('/cart/add/{productId}', [CartController::class, 'addToCart']);
 
 Route::get('/cart', [CartController::class, 'showCart']);
 
-// routes/web.php
-
 Route::patch('/cart/decrease/{id}', [CartController::class, 'decreaseQuantity']);
 Route::patch('/cart/increase/{id}', [CartController::class, 'increaseQuantity']);
 Route::delete('/cart/remove/{id}', [CartController::class, 'removeItem']);
