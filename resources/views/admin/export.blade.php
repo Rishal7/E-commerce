@@ -22,45 +22,30 @@
 
         </form>
 
+        <div id="progress">
 
-        @if (!is_null($batch) && $batch->progress() < 100)
-            <div id="progress">
-
-            </div>
-        @endif
-
-
-        @if ($down && $batch->progress() == 100)
-            <div class="mt-4">
-                <a href="/admin/download" class="text-blue-500 hover:underline font-semibold text-sm">Download Exported
-                    File</a>
-            </div>
-        @else
-            {{-- <p class="mt-4 text-sm ">No export done.</p> --}}
-        @endif
+        </div>
 
     </x-setting>
 
-    @if (!is_null($batch) && $batch->progress() < 100)
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-            function loadContent() {
-                $.ajax({
-                    url: '/admin/export-progress', 
-                    type: 'GET',
-                    dataType: 'html',
-                    success: function(response) {
-                        
-                        $('#progress').html(response);
-                    },
-                    error: function(error) {
-                        console.error(error);
-                    }
-                });
-            }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function loadContent() {
+            $.ajax({
+                url: '/admin/export-progress',
+                type: 'GET',
+                dataType: 'html',
+                success: function(response) {
 
-            setInterval(loadContent, 300);
-        </script>
-    @endif
+                    $('#progress').html(response);
+                },
+                error: function(error) {
+                    console.error(error);
+                }
+            });
+        }
+
+        setInterval(loadContent, 300);
+    </script>
 
 </x-layout>

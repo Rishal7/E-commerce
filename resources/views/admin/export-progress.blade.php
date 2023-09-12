@@ -9,7 +9,7 @@
   
 @endif
 
-@if ($batch->progress() == 100)
+@if ($down && $batch->progress() == 100)
     <p class="mt-4 text-sm">Completed</p>
 @endif
 

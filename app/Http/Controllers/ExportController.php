@@ -14,16 +14,8 @@ class ExportController extends Controller
 {
     public function index()
     {
-        $batchID = Redis::get('export_batch_id');
-
-        $batch = Bus::findBatch($batchID);
-
-        $down = Redis::get('export_completed');
-
         return view('admin.export', [
             'categories' => Category::all(),
-            'batch' => $batch,
-            'down' => $down,
         ]);
     }
 
@@ -101,6 +93,6 @@ class ExportController extends Controller
             'batch' => $batch,
             'down' => $down,
         ]);
-    }        
+    }
 
 }
