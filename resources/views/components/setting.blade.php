@@ -12,16 +12,24 @@
             <h4 class="font-semibold mb-4">Links</h4>
             @admin
             <ul>
-                <li class="mb-2">
+                <li class="mb-1">
                     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'text-blue-500' : ''}}">All Products</a>
                 </li>
 
-                <li class="mb-2"> 
+                <li class="mb-1"> 
                     <a href="/admin/products/create" class="{{ request()->is('admin/products/create') ? 'text-blue-500' : ''}}">New Product</a>
                 </li>
 
-                <li>
+                <li class="mb-1">
                     <a href="/admin/register-manager" class="{{ request()->is('admin/register-manager') ? 'text-blue-500' : ''}}">New Manager</a>
+                </li>
+
+                <li class="mb-1">
+                    <a href="/admin/import" class="{{ request()->is('admin/import') ? 'text-blue-500' : ''}}">Import</a>
+                </li>
+
+                <li>
+                    <a href="/admin/export" class="{{ request()->is('admin/export') ? 'text-blue-500' : ''}}">Export</a>
                 </li>
             </ul>
             @endadmin

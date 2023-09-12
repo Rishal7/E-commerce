@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
@@ -12,7 +11,7 @@ class AdminController extends Controller
     public function index()
     {
         return view('admin.products.index', [
-            'products' => Product::all()
+            'products' => Product::simplePaginate(50)
         ]);
     }
 
@@ -23,10 +22,6 @@ class AdminController extends Controller
 
     public function store()
     {
-
-        // request()->file('thumbnail')->store('thumbnails');
-        // return 'done';
-
         $attributes = $this->validateProduct();
         $attributes['user_id'] = auth()->id();
         $attributes['thumbnail'] = request()->file('thumbnail')->store('thumbnails');
@@ -68,8 +63,8 @@ class AdminController extends Controller
         return request()->validate([
             'name' => 'required',
             'price' => 'required',
-            'thumbnail' => $product->exists ? ['image'] :['required', 'image'],
-            'category_id' => ['required', Rule::exists('categories','id')]
+            'thumbnail' => $product->exists ? ['image'] : ['required', 'image'],
+            'category_id' => ['required', Rule::exists('categories', 'id')]
         ]);
     }
 
@@ -84,12 +79,10 @@ class AdminController extends Controller
             'username' => 'required|max:255|min:3|unique:users,username',
             'email' => 'required|email|max:255|unique:users,email',
             'roles' => 'required',
-            'password' => 'required|min:8',  //['required', 'min:8']
+            'password' => 'required|min:8', //['required', 'min:8']
         ]);
 
         $user = User::create($attributes);
-
-        // auth()->login($user);
 
         return back()->with('success', 'Manager has been created');
     }
