@@ -7,7 +7,6 @@ use App\Models\Category;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class ExportController extends Controller
@@ -44,26 +43,20 @@ class ExportController extends Controller
 
         $dataChunks = array_chunk($data, 10);
 
-        // Define a filename for the exported CSV file (optional)
-        $filename = 'exported_data.csv';
-
-
+        // Create a batch and dispatch it
         $batch = Bus::batch([])->dispatch();
 
         foreach ($dataChunks as $key => $chunk) {
-            $batch->add(new ExportProducts($chunk, $filename));
+            $batch->add(new ExportProducts($chunk, $key + 1, count($dataChunks)));
         }
-
 
         Redis::set('export_batch_id', $batch->id);
 
-        $filename = 'temp_export_' . $batch->id . '.csv';
+        $csvFilename = 'final_export_' . $batch->id . '.csv';
 
-        Redis::set('export_filename', $filename);
+        Redis::set('export_filename', $csvFilename);
 
-        Redis::setex('export_completed', 20, true);
-
-        session()->flash('export_completed', true);
+        session()->flash('export_completed', false);
 
         return redirect()->back();
     }
@@ -89,9 +82,12 @@ class ExportController extends Controller
 
         $down = Redis::get('export_completed');
 
+        $fileName = 'final_export_' . $batch->id . '.csv';
+
         return view('admin.export-progress', [
             'batch' => $batch,
             'down' => $down,
+            'filePath' => $fileName
         ]);
     }
 

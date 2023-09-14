@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\Import;
+use App\Imports\ProductsImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Redis;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ImportController extends Controller
 {
@@ -14,48 +16,49 @@ class ImportController extends Controller
         $batchID = Redis::get('import_batch_id');
 
         if ($batchID) {
-            # code...
             $batch = Bus::findBatch($batchID);
             return view('admin.import', [
                 'batch' => $batch,
             ]);
+        } else {
+            return view(
+                'admin.import'
+            );
         }
-        else {
-            return view('admin.import'
-        );
-        }
-        
+
     }
 
     public function import()
     {
+        if (request()->hasFile('csv')) {
+            $file = request()->file('csv');
 
-        if (request()->has('csv')) {
-            $data = file(request()->csv);
-            $chunks = array_chunk($data, 10);
-            $header = [];
-            $batch = Bus::batch([])->dispatch();
+            $importData = Excel::toArray(new ProductsImport, $file);
 
-            Redis::set('import_batch_id', $batch->id);
-            Redis::setex('import_completed', 20, true);
+            if (count($importData) > 0) {
+                $data = $importData[0];
 
-            foreach ($chunks as $key => $chunk) {
 
-                $data = array_map('str_getcsv', $chunk);
+                $chunks = array_chunk($data, 10);
+                $header = [];
+                $batch = Bus::batch([])->dispatch();
 
-                if ($key === 0) {
-                    $header = $data[0];
-                    unset($data[0]);
+                Redis::set('import_batch_id', $batch->id);
+
+                foreach ($chunks as $key => $chunk) {
+                    if ($key === 0) {
+                        $header = $chunk[0];
+                        unset($chunk[0]);
+                    }
+
+                    $batch->add(new Import(auth()->id(), $chunk, $header));
                 }
 
-                $batch->add(new Import(auth()->id(), $data, $header));
-
+                return back();
             }
-
-            return back()->with('success', 'Imported successfully');
-
         }
-        return back()->with('error', 'Plaese select a file');
+
+        return back()->with('error', 'Please select a file');
     }
 
     public function checkProgress()
@@ -70,5 +73,5 @@ class ImportController extends Controller
             'batch' => $batch,
             'down' => $down,
         ]);
-    } 
+    }
 }

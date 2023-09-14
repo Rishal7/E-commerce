@@ -7,24 +7,29 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Redis;
 use App\Events\ExportProgressEvent;
+use App\Exports\ProductsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExportProducts implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, SerializesModels;
 
     protected $data;
-    protected $filename;
-    protected $totalRecords;
+    protected $jobIndex;
+    protected $totalJobs;
 
-    public function __construct($data, $filename)
+    public function __construct(array $data, $jobIndex, $totalJobs)
     {
         $this->data = $data;
-        $this->filename = $filename;
+        $this->jobIndex = $jobIndex;
+        $this->totalJobs = $totalJobs;
     }
+
 
     public function handle()
     {
@@ -32,52 +37,47 @@ class ExportProducts implements ShouldQueue
             return;
         }
 
-        $csvData = $this->arrayToCsv($this->data);
-
         $batchId = $this->batch()->id;
-        $tempFilename = 'temp_export_' . $batchId . '.csv';
 
-        if (!Storage::disk('local')->exists($tempFilename)) {
-            $this->initializeTempFile($tempFilename, $csvData);
-            Storage::disk('local')->append($tempFilename, $csvData);
-        } else {
-            Storage::disk('local')->append($tempFilename, $csvData);
+        // Load existing JSON data if any
+        $jsonFilename = 'temp_export_' . $batchId . '.json';
+        $existingData = [];
+
+        if (Storage::disk('local')->exists($jsonFilename)) {
+            $existingDataJson = Storage::disk('local')->get($jsonFilename);
+            $existingData = json_decode($existingDataJson, true);
         }
 
+        $combinedData = array_merge($existingData, $this->data);
+
+        $jsonData = json_encode($combinedData);
+
+        Storage::disk('local')->put($jsonFilename, $jsonData);
+
+        if ($this->jobIndex === $this->totalJobs) {
+
+            $this->finalizeCsvExport($batchId);
+
+            Redis::setex('export_completed', 20, true);
+        }
     }
 
-
-    private function initializeTempFile($filename, $csvData)
+    public function finalizeCsvExport($batchId)
     {
-        $output = fopen('php://temp', 'w');
-        fputcsv($output, array_keys($this->data[0]));
-        rewind($output);
-        $csv = stream_get_contents($output);
-        fclose($output);
-        $csv = rtrim($csv, "\n");
-        Storage::disk('local')->append($filename, $csv);
-    }
+        $jsonFilename = 'temp_export_' . $batchId . '.json';
+        $csvFilename = 'final_export_' . $batchId . '.csv';
 
+        $jsonData = Storage::disk('local')->get($jsonFilename);
 
-    private function arrayToCsv(array $array)
-    {
-        if (empty($array)) {
-            return '';
-        }
+        $dataArray = json_decode($jsonData, true);
 
-        $output = fopen('php://temp', 'w');
+        $export = new ProductsExport($dataArray);
 
-        foreach ($array as $row) {
-            fputcsv($output, $row);
-        }
+        Excel::store($export, $csvFilename, 'local');
 
-        rewind($output);
-        $csv = stream_get_contents($output);
-        fclose($output);
+        // Delete the JSON file after CSV generation
+        Storage::disk('local')->delete($jsonFilename);
 
-        $csv = rtrim($csv, "\n");
-
-        return $csv;
     }
 
 }

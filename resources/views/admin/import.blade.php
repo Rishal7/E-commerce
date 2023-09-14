@@ -12,11 +12,9 @@
 
         </form>
 
-
         <div id="progress">
 
         </div>
-
 
     </x-setting>
 
