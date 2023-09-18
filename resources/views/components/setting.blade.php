@@ -2,7 +2,7 @@
 
 <section class="py-8 max-w-4xl mx-auto">
 
-    <h1 class="text-xl font-bold mb-8 pb-2 border-b">
+    <h1 class="text-2xl text-gray-700 font-semibold mb-8 pb-2 border-b">
         {{ $heading}}
     </h1>
 
@@ -20,16 +20,36 @@
                     <a href="/admin/products/create" class="{{ request()->is('admin/products/create') ? 'text-blue-500' : ''}}">New Product</a>
                 </li>
 
-                <li class="mb-1">
+                <li class="mb-2">
                     <a href="/admin/register-manager" class="{{ request()->is('admin/register-manager') ? 'text-blue-500' : ''}}">New Manager</a>
                 </li>
+
+                <div class="border border-b mb-2 mr-12"></div>
 
                 <li class="mb-1">
                     <a href="/admin/import" class="{{ request()->is('admin/import') ? 'text-blue-500' : ''}}">Import</a>
                 </li>
 
-                <li>
+                <li class="mb-1">
+                    <a href="/admin/schedule-import" class="{{ request()->is('admin/schedule-import') ? 'text-blue-500' : ''}}">Scheduled Imports</a>
+                </li>
+
+                <li class="mb-2 ">
+                    <a href="/admin/schedule-import/history" class="{{ request()->is('admin/schedule-import/history') ? 'text-blue-500' : ''}}">Past Imports</a>
+                </li>
+
+                <div class="border border-b mb-2 mr-12"></div>
+
+                <li class="mb-1">
                     <a href="/admin/export" class="{{ request()->is('admin/export') ? 'text-blue-500' : ''}}">Export</a>
+                </li>
+
+                <li class="mb-1 ">
+                    <a href="/admin/schedule-export" class="{{ request()->is('admin/schedule-export') ? 'text-blue-500' : ''}} ">Scheduled Exports</a>
+                </li>
+
+                <li class="mb-1">
+                    <a href="/admin/schedule-export/history" class="{{ request()->is('admin/schedule-export/history') ? 'text-blue-500' : ''}}">Past Exports</a>
                 </li>
             </ul>
             @endadmin

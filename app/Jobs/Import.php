@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -26,6 +27,7 @@ class Import implements ShouldQueue
     public function __construct($userId, $data, $header)
     {
         $this->userId = $userId;
+        
         $this->data = $data;
         $this->header = $header;
     }

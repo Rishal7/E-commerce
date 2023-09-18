@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Import;
 use App\Imports\ProductsImport;
+use App\Models\ScheduledImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -30,8 +32,8 @@ class ImportController extends Controller
 
     public function import()
     {
-        if (request()->hasFile('csv')) {
-            $file = request()->file('csv');
+        if (request()->hasFile('file')) {
+            $file = request()->file('file');
 
             $importData = Excel::toArray(new ProductsImport, $file);
 

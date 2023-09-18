@@ -8,8 +8,9 @@ use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\ImportScheduleController;
+use App\Http\Controllers\ExportScheduleController;
 use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 
@@ -39,12 +40,26 @@ Route::get('admin/import', [ImportController::class, 'index'])->middleware('can:
 Route::post('admin/import', [ImportController::class, 'import'])->middleware('can:admin');
 Route::get('/admin/import-progress', [ImportController::class, 'checkProgress'])->middleware('can:admin');
 
+Route::get('/admin/schedule-import', [ImportScheduleController::class, 'index'])->middleware('can:admin');
+Route::post('/admin/schedule-import', [ImportScheduleController::class, 'store'])->middleware('can:admin');
+Route::delete('admin/schedule-import/{import}', [ImportScheduleController::class, 'destroy'])->middleware('can:admin');
+Route::patch('admin/schedule-import/{import}', [ImportScheduleController::class, 'update'])->middleware('can:admin');
+Route::get('/admin/schedule-import/history', [ImportScheduleController::class, 'past'])->middleware('can:admin');
+
+
+Route::get('/admin/schedule-export', [ExportScheduleController::class, 'index'])->middleware('can:admin');
+Route::post('/admin/schedule-export', [ExportScheduleController::class, 'store'])->middleware('can:admin');
+Route::delete('admin/schedule-export/{export}', [ExportScheduleController::class, 'destroy'])->middleware('can:admin');
+Route::patch('admin/schedule-export/{export}', [ExportScheduleController::class, 'update'])->middleware('can:admin');
+Route::get('/admin/schedule-export/history', [ExportScheduleController::class, 'past'])->middleware('can:admin');
+
+
 Route::get('admin/export', [ExportController::class, 'index'])->middleware('can:admin');
 Route::post('admin/export', [ExportController::class, 'export'])->middleware('can:admin');
 Route::get('admin/download', [ExportController::class, 'download'])->middleware('can:admin');
 Route::get('/admin/export-progress', [ExportController::class, 'checkProgress'])->middleware('can:admin');
 
-Route::post('admin/products', [AdminController::class, 'store'])->middleware('can:admin,admin');
+Route::post('admin/products', [AdminController::class, 'store'])->middleware('can:admin');
 Route::get('admin/products/create', [AdminController::class, 'create'])->middleware('can:admin');
 Route::get('admin/products', [AdminController::class, 'index'])->middleware('can:admin');
 Route::get('admin/products/{product}/edit', [AdminController::class, 'edit'])->middleware('can:admin');
